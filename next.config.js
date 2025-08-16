@@ -8,7 +8,9 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   experimental: {
-    serverActions: true,
+    serverActions: {
+      bodySizeLimit: '1mb'
+    },
   },
   allowedDevOrigins: [
     "https://9000-firebase-studio-1754348898809.cluster-ux5mmlia3zhhask7riihruxydo.cloudworkstations.dev",
