@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { format, parseISO, isAfter } from 'date-fns';
 import { FileText, Users, ShieldCheck, ShieldX, PlusCircle, Loader2 } from 'lucide-react';
-import type { Policy } from '@/ai/flows/search-policies';
+ 
 import { getAllPolicies, type DashboardStats } from '@/app/actions';
 import {
   Table,

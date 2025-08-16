@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { Policy } from '@/ai/flows/search-policies';
+ 
 import { createClient } from '@/lib/supabase/server';
 import { cookies } from 'next/headers';
 import type { DashboardStats } from '@/app/actions';

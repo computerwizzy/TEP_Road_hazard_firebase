@@ -1,7 +1,7 @@
 
 import { getAllPolicies, getDashboardStats } from '@/app/actions';
 import AdminDashboard from '@/components/admin-dashboard';
-import type { Policy } from '@/ai/flows/search-policies';
+ 
 import { AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { DashboardStats } from '@/app/actions';

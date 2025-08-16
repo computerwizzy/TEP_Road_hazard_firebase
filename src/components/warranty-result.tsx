@@ -3,8 +3,8 @@
 
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Mail, Loader2, FileText, Printer, Download } from 'lucide-react';
-import { handleSendEmail, handleDownloadWord } from '@/app/actions';
+import { Loader2, FileText, Printer, Download } from 'lucide-react';
+import { handleDownloadWord } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import rehypeRaw from 'rehype-raw';
@@ -48,30 +48,8 @@ interface WarrantyResultProps {
 }
 
 export function WarrantyResult({ result, onReset }: WarrantyResultProps) {
-    const [isSendingEmail, setIsSendingEmail] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
     const { toast } = useToast();
-
-    async function onSendEmail() {
-        if (!result) return;
-        setIsSendingEmail(true);
-        const response = await handleSendEmail({
-            policyNumber: result.policyNumber,
-        });
-        if (response.success) {
-            toast({
-                title: "Email Sent",
-                description: `The warranty policy has been sent to ${result.customerEmail}.`,
-            });
-        } else {
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: response.error || "Failed to send email.",
-            });
-        }
-        setIsSendingEmail(false);
-    }
 
     function handlePrint() {
         const printWindow = window.open(`/policy/${result.policyNumber}/print`, '_blank');
@@ -123,7 +101,7 @@ export function WarrantyResult({ result, onReset }: WarrantyResultProps) {
                         Your Warranty Policy is Ready
                     </CardTitle>
                     <CardDescription>
-                        Thank you for registering, {result.customerName}. You can email, print, or download the policy document.
+                        Thank you for registering, {result.customerName}. You can print, or download the policy document.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -133,19 +111,6 @@ export function WarrantyResult({ result, onReset }: WarrantyResultProps) {
                 </CardContent>
                 <CardFooter className="flex flex-col sm:flex-row justify-between gap-4 print-hidden">
                     <div className="flex flex-wrap gap-4">
-                        <Button onClick={onSendEmail} disabled={isSendingEmail}>
-                            {isSendingEmail ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Sending...
-                                </>
-                            ) : (
-                                <>
-                                    <Mail className="mr-2 h-4 w-4" />
-                                    Email to Customer
-                                </>
-                            )}
-                        </Button>
                         <Button variant="outline" onClick={handlePrint}>
                             <Printer className="mr-2 h-4 w-4" />
                             Print Policy

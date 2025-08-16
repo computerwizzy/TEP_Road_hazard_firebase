@@ -4,14 +4,11 @@
 import { z } from "zod";
 import fs from 'fs/promises';
 import path from 'path';
-import { sendPolicyEmail, type SendPolicyEmailInput } from "@/ai/flows/send-policy-email";
 import { savePolicy, addUser, deleteUser, getUsers, getAllPoliciesFromDb, getDashboardStatsFromDb, getFullPolicyFromDb } from "@/data/db-actions";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import type { Policy } from "@/ai/flows/search-policies";
-
 
 const WarrantyClaimSchema = z.object({
   invoiceNumber: z.string().min(1, { message: "Invoice number is required." }),
@@ -33,7 +30,7 @@ const WarrantyClaimSchema = z.object({
   tireSize: z.string().min(5, { message: "Tire size is required." }),
   tireQuantity: z.coerce.number().min(1).max(6),
   pricePerTire: z.coerce.number().min(0),
-  roadHazardPrice: z.coerce.number().min(0, { message: "Price must be a positive number."}).optional(),
+  roadHazardPrice: z.coerce.number().min(0, { message: "Price must be a positive number.",}).optional(),
   tireDot1: z.string().min(7).max(13),
   tireDot2: z.string().optional(),
   tireDot3: z.string().optional(),
@@ -95,13 +92,19 @@ async function generatePolicyDocument(values: FullPolicyData): Promise<{ policyD
 **Tires Purchased:** ${policyData.tireQuantity}
 **Brand & Model:** ${policyData.tireBrand} ${policyData.tireModel}
 **Size:** ${policyData.tireSize}
-**Price per tire:** $${policyData.pricePerTire?.toFixed(2) || 'N/A'}
+**Price per tire:** ${policyData.pricePerTire?.toFixed(2) || 'N/A'}
 `;
   
-  let coveredTiresTable = `\n### Covered Tires\n\n| Brand & Model | Size | DOT Number |\n| :--- | :--- | :--- |\n`;
+  let coveredTiresTable = `
+### Covered Tires
+
+| Brand & Model | Size | DOT Number |
+| :--- | :--- | :--- |
+`;
   allTireDots.forEach((dot: string) => {
       if (dot && dot.trim()) {
-          coveredTiresTable += `| ${policyData.tireBrand} ${policyData.tireModel} | ${policyData.tireSize} | ${dot.trim()} |\n`;
+          coveredTiresTable += `| ${policyData.tireBrand} ${policyData.tireModel} | ${policyData.tireSize} | ${dot.trim()} |
+`;
       }
   });
 
@@ -176,7 +179,7 @@ export async function handleWarrantyClaim(values: z.infer<typeof WarrantyClaimSc
 
 export async function handleSearch(searchTerm: string): Promise<{
   success: boolean;
-  data?: { results: Policy[] };
+  data?: { results: any[] };
   error?: string;
 }> {
   try {
@@ -212,45 +215,11 @@ export async function handleSearch(searchTerm: string): Promise<{
     })) : [];
 
 
-    return { success: true, data: { results: results as Policy[] } };
+    return { success: true, data: { results: results as any[] } };
   } catch (error) {
     console.error("Error in handleSearch:", error);
     const message = error instanceof Error ? error.message : "An unknown error occurred.";
     return { success: false, error: message };
-  }
-}
-
-const EmailSchema = z.object({
-  policyNumber: z.string(),
-});
-
-export async function handleSendEmail(values: z.infer<typeof EmailSchema>): Promise<{
-  success: boolean;
-  error?: string;
-}> {
-  try {
-    const policyData = await getFullPolicyFromDb(values.policyNumber);
-    if (!policyData) {
-        return { success: false, error: 'Policy not found.' };
-    }
-
-    const docResult = await generatePolicyDocument(policyData);
-    if (!docResult.policyDocument) {
-        return { success: false, error: 'Failed to regenerate policy document.'};
-    }
-
-    const policyUrl = new URL(`/policy/${values.policyNumber}`, process.env.NEXT_PUBLIC_APP_URL).toString();
-    const input: SendPolicyEmailInput = {
-      customerName: policyData.customerName,
-      customerEmail: policyData.customerEmail,
-      policyDocument: docResult.policyDocument,
-      policyUrl: policyUrl,
-    };
-    const result = await sendPolicyEmail(input);
-    return { success: result.success };
-  } catch (error) {
-    console.error("Error sending email:", error);
-    return { success: false, error: "Failed to send email. Please try again." };
   }
 }
 
@@ -308,7 +277,7 @@ export async function handleDownloadWord(values: z.infer<typeof DownloadSchema>)
 
 export async function getAllPolicies(page: number = 1, limit: number = 10): Promise<{
   success: boolean;
-  data?: Policy[];
+  data?: any[];
   count?: number;
   error?: string;
 }> {

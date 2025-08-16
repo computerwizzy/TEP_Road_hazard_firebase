@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { format, parseISO } from 'date-fns';
 import { handleSearch, getAllPolicies } from '@/app/actions';
-import type { Policy } from '@/ai/flows/search-policies';
+ 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
