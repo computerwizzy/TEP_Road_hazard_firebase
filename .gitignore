@@ -45,3 +45,13 @@ firebase-debug.log
 firestore-debug.log
 # Local Netlify folder
 .netlify
+
+# Claude Code settings
+.claude/
+
+# IDX development environment
+.idx/
+
+# Temporary files
+.modified
+*.tmp
