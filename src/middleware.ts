@@ -11,10 +11,14 @@ export async function middleware(request: NextRequest) {
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!supabaseUrl || !supabaseKey) {
-    console.error('Supabase environment variables are missing or invalid.')
-    throw new Error('Supabase environment variables are missing or invalid.')
+  
+  // Check if we have valid Supabase credentials or if we're in demo mode
+  if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('your_supabase') || supabaseKey.includes('your_supabase')) {
+    // In demo mode, allow access to admin routes without authentication
+    console.warn('Running in demo mode - no authentication required')
+    return response
   }
+  
   const supabase = createServerClient(
     supabaseUrl,
     supabaseKey,

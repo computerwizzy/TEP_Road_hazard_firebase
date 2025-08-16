@@ -148,6 +148,7 @@ export default function WarrantyForm() {
   
   const tireQuantity = form.watch('tireQuantity');
   const pricePerTire = form.watch('pricePerTire');
+  const policyDuration = form.watch('policyDuration');
   const tireDot1Value = form.watch('tireDot1');
   const prevTireDot1Value = useRef<string>();
   
@@ -155,18 +156,20 @@ export default function WarrantyForm() {
     const calculateRoadHazardPrice = () => {
         const price = parseFloat(String(pricePerTire)) || 0;
         const quantity = parseInt(String(tireQuantity), 10) || 0;
+        const duration = parseInt(String(policyDuration), 10) || 0;
 
-        if (price > 0 && quantity > 0) {
-            const totalTireCost = price * quantity;
-            const hazardPrice = totalTireCost * 0.10;
-            form.setValue('roadHazardPrice', parseFloat(hazardPrice.toFixed(2)), { shouldValidate: true, shouldDirty: true });
+        if (price > 0 && quantity > 0 && duration > 0) {
+            // 10% of cost per tire for every 1 year
+            const hazardPricePerTirePerYear = price * 0.10;
+            const totalHazardPrice = hazardPricePerTirePerYear * quantity * duration;
+            form.setValue('roadHazardPrice', parseFloat(totalHazardPrice.toFixed(2)), { shouldValidate: true, shouldDirty: true });
         } else {
              // Use setValue to clear the value if conditions aren't met
             form.setValue('roadHazardPrice', undefined, { shouldValidate: true, shouldDirty: true });
         }
     };
     calculateRoadHazardPrice();
-  }, [pricePerTire, tireQuantity, form]);
+  }, [pricePerTire, tireQuantity, policyDuration, form]);
 
   useEffect(() => {
     const updateOtherDots = () => {
@@ -689,7 +692,7 @@ export default function WarrantyForm() {
                   name="roadHazardPrice"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Road Hazard Price (10% of Total)</FormLabel>
+                      <FormLabel>Road Hazard Price (10% per tire per year)</FormLabel>
                       <FormControl>
                         <Input type="text" placeholder="Calculated automatically" {...field} readOnly className="bg-muted" />
                       </FormControl>

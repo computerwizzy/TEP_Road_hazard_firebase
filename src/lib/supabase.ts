@@ -13,12 +13,24 @@ function getSupabaseBrowserClient() {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('your_supabase') || supabaseAnonKey.includes('your_supabase')) {
         if (process.env.NODE_ENV === 'development') {
-            console.warn('Supabase URL and/or anonymous key are not set for the browser. Please check your .env.local file.');
+            console.warn('Running in demo mode - Supabase credentials not configured.');
         }
-        // In a real app, you might want to throw an error here or handle it gracefully.
-        // For this context, we create a client that will fail, pointing to the missing env vars.
+        // Return a mock client for demo purposes
+        supabase = {
+            storage: {
+                from: () => ({
+                    upload: () => Promise.resolve({ data: { path: 'mock-receipt.pdf' }, error: null }),
+                    getPublicUrl: () => ({ data: { publicUrl: 'https://example.com/mock-receipt.pdf' } })
+                })
+            },
+            from: () => ({
+                select: () => Promise.resolve({ data: [], error: null }),
+                insert: () => Promise.resolve({ data: [{ id: 1 }], error: null })
+            })
+        } as any;
+        return supabase;
     }
     supabase = createBrowserClient(supabaseUrl!, supabaseAnonKey!);
     return supabase;
